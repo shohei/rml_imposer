@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <title>load test</title>
+	    <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+        <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+        <link type="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+	<script>
+      $(function() {
+      $.get("kono.rml",function(data){
+        //console.log(data);
+		drawPath(data);
+        });
+
+	var canvas = $("#canvas")[0];
+    var ctx = canvas.getContext( "2d" );
+	var px = 0;
+    var py = 0;
+	var cx = 0;
+	var cy = 0;
+	function Func(value){
+	   console.log('ni');
+       var split = value.replace(';','').replace('PD','').split(',');
+	   cx = split[0]; 
+	   cy = split[1];
+	   drawLine(cx,cy,px,py)
+	   px = cx;
+	   py = cy;
+	}
+	function drawLine(cx,cy,px,py){
+           ctx.beginPath();
+           ctx.moveTo( px, py);
+           ctx.lineTo( cx, cy);
+           ctx.closePath();
+           ctx.stroke();
+	 }
+     function drawPath(rml){
+		var coord = rml.match(/PD.*?;/g);
+        $.each(coord, function(index, value) {
+			setTimeout(function(){Func(value)},10+index*10);
+        });
+	   }
+
+      });
+	</script>
+</head>
+<body>
+  <div id="read_text">load RML</div>        
+  <canvas id="canvas" width="1300" height="1300"></canvas>
+</body>
+</html>
