@@ -2,12 +2,13 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>load test</title>
+    <title>RML Analyzer</title>
     <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
     <link type="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
     <script>
 
+      var rmloutput = [];
       $(function() {
         timerBreak = 0;
         var canvas = $("#canvas")[0];
@@ -50,6 +51,7 @@
         }
         function runDemo(){
             $.get("kono.rml",function(data){
+              console.log(typeof(data));
               drawPath(data);
             });
         }
@@ -65,8 +67,23 @@
               }
           });
         }
-        runDemo();
+        
+       function readFile (evt) {
+           var files = evt.target.files;
+           var file = files[0];           
+           var reader = new FileReader();
+           reader.onload = function() {
+             console.log(this.result);            
+             drawPath(this.result);
+           }
+           reader.readAsText(file)
+           // data = reader.result;
+           // console.log(data); 
+        }
 
+        $('#load_file').change(function(e){
+            readFile(e);
+        });
       });
 
     </script>
@@ -75,10 +92,15 @@
     <h1>RML Analyzer</h1>
 
     <div id="read_text">load RML</div>        
+    <input type="file" id="load_file" name="files[]" multiple />
+    <br />
+    <hr />
     <button id="demo">run demo</button>
     <button id="pause">pause</button>
     <button id="resume">resume</button>
-    <div id="printline">hey</div>
+    <hr />
+    <div id="printline"></div>
+    <div id="list"></div>
 
 
     <canvas id="canvas" width="1000" height="1000"></canvas>
