@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <title>RML replacer</title>
+		<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+		<script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+		<link type="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+		<style>
+      .column {
+       clear:both;
+      }
+      
+      .pink {
+       background-color: pink;
+       float: left;
+       margin-top: 10px;
+       margin-left: 10px;
+       width: 100px;
+       height: 100px;    
+       border: solid 1px black;
+      }
+      
+      div.pink-active {
+          background-color:lavenderblush;
+      }
+      div.pink-hover  {background-color:deeppink;}
+      
+      .circuit {
+          float: left;
+          margin-top:30px;
+          margin-left:10px;
+          width:50px;
+          height:50px;
+          border: solid 1px black;
+          background-color: green;
+      }
+      
+      #res,#result{
+           margin-top:10px; 
+      }
+      
+		</style>
+		<script>
+$(function(){
+  
+    $(".pink").droppable({
+        accept: ".circuit",// .circuitをドロップ可能にする
+        tolerance: "fit",   // Draggable要素が接触した場合にDrop可能にする
+        activeClass: "pink-active",  // Draggable要素がドラッグしているときに適用するクラス
+        hoverClass: "pink-hover",  // Draggable要素が上に乗ったときに適用するクラス
+        drop: function(ev, ui) {
+            // ドロップされたDraggable要素を追加
+            var dropNum = ui.draggable[0].innerHTML;
+            //console.log(ui.draggable);
+            //$(this)[0].lastChild = "hoge";
+            //$(this)[0].lastChild.innerHTML="hoge";
+            $(this)[0].lastChild.innerHTML= dropNum + "";
+            console.log($(this)[0].lastChild.innerHTML);
+            ui.draggable.appendTo(this);
+        },
+        over: function(ev, ui) {
+            // Draggable要素が上に乗ったときに文字を表示
+            $(".over", this).show().fadeOut(1000);
+        }
+    })
+    
+    $(".circuit").draggable();
+    
+    $("#result").click(function(){
+        var result = [];
+        for(var i=1;i<7;i++){
+            result.push($("#"+i).children(".res").text());   
+        }
+        $("#res").text(result);  
+    });
+    
+
+});
+</script>
+</head>
+<body>
+
+<div class="column">
+    <div class="pink" id="1">A<span class="over" style="display:none;">Over!</span><span class="res"></span></div>
+    <div class="pink" id="2">B<span class="over" style="display:none;">Over!</span><span class="res"></span></div>
+    <div class="pink" id="3">C<span class="over"style="display:none;">Over!</span><span class="res"></span></div>
+</div>
+<div class="column">
+    <div class="pink" id="4">D<span class="over" style="display:none;">Over!</span><span class="res"></span></div>
+    <div class="pink" id="5">E<span class="over" style="display:none;">Over!</span><span class="res"></span></div>
+    <div class="pink" id="6">F<span class="over" style="display:none;">Over!</span><span class="res"></span></div>
+</div>
+
+<div class="column">
+ <div class="circuit">1</div>
+ <div class="circuit">2</div>
+ <div class="circuit">3</div>
+ <div class="circuit">4</div>
+ <div class="circuit">5</div>
+ <div class="circuit">6</div>
+</div>
+
+<div class="column">
+    <button id="result">Show result</div>
+    <span id="res"></span>
+</div>    
+    
+    
+        
+</body>
+</html>
