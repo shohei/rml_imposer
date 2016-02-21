@@ -3,9 +3,10 @@
     <head>
         <meta charset="UTF-8">
         <title>RML Analyzer</title>
-        <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
-        <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
-        <link type="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+        <script src="./jquery.js"></script>
+        <!-- <script src="http://code.jquery.com/jquery&#45;1.10.2.js"></script> -->
+        <!-- <script src="http://code.jquery.com/ui/1.10.4/jquery&#45;ui.js"></script> -->
+        <!-- <link type="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery&#45;ui.css"> -->
         <script>
 
             var rmloutput = [];
@@ -70,7 +71,7 @@
                     var coord1 = rml.match(/PD.*?;/g);
                     var coord2 = rml.match(/Z.*?;/g);
                     if(coord1!=null){
-                        load_rml_timers = coord2.map(function(v, i) {
+                        load_rml_timers = coord1.map(function(v, i) {
                             if (i < curfile) {
                                 return null;
                                 } else {
@@ -79,16 +80,18 @@
                                 }, 10+i*10);
                             }
                         });
-                        } else if(coord2!=null){
-                        load_rml_timers = coord2.map(function(v, i) {
-                            if (i < curfile) {
-                                return null;
-                                } else {
-                                return setTimeout(function() {
-                                    Func2(v);
-                                }, 10+i*10);
-                            }
-                        });
+                        } else {
+                        if(coord2!=null){
+                            load_rml_timers = coord2.map(function(v, i) {
+                                if (i < curfile) {
+                                    return null;
+                                    } else {
+                                    return setTimeout(function() {
+                                        Func2(v);
+                                    }, 10+i*10);
+                                }
+                            });
+                        }
                     }
                 }
 
