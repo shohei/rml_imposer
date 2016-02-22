@@ -1,136 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>RML Analyzer</title>
-        <script src="./jquery.js"></script>
-        <!-- <script src="http://code.jquery.com/jquery&#45;1.10.2.js"></script> -->
-        <!-- <script src="http://code.jquery.com/ui/1.10.4/jquery&#45;ui.js"></script> -->
-        <!-- <link type="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery&#45;ui.css"> -->
-        <script>
+  <head>
+    <meta charset="UTF-8">
+    <title>RML Analyzer</title>
+    <script src="./jquery.js"></script>
+    <!-- <script src="http://code.jquery.com/jquery&#45;1.10.2.js"></script> -->
+    <!-- <script src="http://code.jquery.com/ui/1.10.4/jquery&#45;ui.js"></script> -->
+    <!-- <link type="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery&#45;ui.css"> -->
+    <script>
 
-            var rmloutput = [];
-            $(function() {
-                timerBreak = 0;
-                var canvas = $("#canvas")[0];
-                var ctx = canvas.getContext( "2d" );
-                var px = 0;
-                var py = 0;
-                var cx = 0;
-                var cy = 0;
-                var line = 0;
-                var timer = 0;
-                var curfile = 0;
-                var load_rml_timers;
-                $("#demo").click(function(){
-                    runDemo();
-                });
-                $("#pause").click(function(){
-                    $.each(load_rml_timers, function(i, timer) {
-                        if (timer) {
-                            clearTimeout(timer);
-                        }
-                    });
-                });
-                $("#resume").click(runDemo);
-                function Func(value){
-                    var split = value.replace(';','').replace('PD','').split(',');
-                    cx = split[0]; 
-                    cy = split[1];
-                    drawLine(cx,cy,px,py,line)
-                    px = cx;
-                    py = cy;
-                    line = line + 1;
-                }
-                function Func2(value){
-                    var split = value.replace(';','').replace('Z','').split(',');
-                    cx = split[0]; 
-                    cy = split[1];
-                    cz = split[2];
-                    drawLine(cx,cy,px,py,line)
-                    px = cx;
-                    py = cy;
-                    line = line + 1;
-                    $("#depth").text("Depth: "+cz);
-                }
-                function drawLine(cx,cy,px,py,line){
-                    ctx.beginPath();
-                    ctx.moveTo( px/5, py/5);
-                    ctx.lineTo( cx/5, cy/5);
-                    ctx.closePath();
-                    ctx.stroke();
-                    $("#printline").text("Line: "+line);
-                }
-                function runDemo(){
-                    $.get("kono.rml",function(data){
-                        console.log(typeof(data));
-                        drawPath(data);
-                    });
-                }
-                function drawPath(rml){
-                    var coord1 = rml.match(/PD.*?;/g);
-                    var coord2 = rml.match(/Z.*?;/g);
-                    if(coord1!=null){
-                        load_rml_timers = coord1.map(function(v, i) {
-                            if (i < curfile) {
-                                return null;
-                                } else {
-                                return setTimeout(function() {
-                                    Func(v);
-                                }, 10+i*10);
-                            }
-                        });
-                        } else {
-                        if(coord2!=null){
-                            load_rml_timers = coord2.map(function(v, i) {
-                                if (i < curfile) {
-                                    return null;
-                                    } else {
-                                    return setTimeout(function() {
-                                        Func2(v);
-                                    }, 10+i*10);
-                                }
-                            });
-                        }
-                    }
-                }
-
-                function readFile (evt) {
-                    var files = evt.target.files;
-                    var file = files[0];           
-                    var reader = new FileReader();
-                    reader.onload = function() {
-                        console.log(this.result);            
-                        drawPath(this.result);
-                    }
-                    reader.readAsText(file)
-                    // data = reader.result;
-                    // console.log(data); 
-                }
-
-                $('#load_file').change(function(e){
-                    readFile(e);
-                });
+      var rmloutput = [];
+      $(function() {
+        timerBreak = 0;
+        var canvas = $("#canvas")[0];
+        var ctx = canvas.getContext( "2d" );
+        var px = 0;
+        var py = 0;
+        var cx = 0;
+        var cy = 0;
+        var line = 0;
+        var timer = 0;
+        var curfile = 0;
+        var load_rml_timers;
+        var offset = false;
+        var scale;
+        var srate;
+        $("#demo").click(function(){
+          runDemo();
+        });
+        $("#pause").click(function(){
+          $.each(load_rml_timers, function(i, timer) {
+            if (timer) {
+              clearTimeout(timer);
+            }
+          });
+        });
+        $("#resume").click(runDemo);
+        function Func(value){
+          var split = value.replace(';','').replace('PD','').split(',');
+          cx = split[0]; 
+          cy = split[1];
+          drawLine(cx,cy,px,py,line)
+          px = cx;
+          py = cy;
+          line = line + 1;
+        }
+        function Func2(value){
+          var split = value.replace(';','').replace('Z','').split(',');
+          cx = split[0]; 
+          cy = split[1];
+          cz = split[2];
+          cx=parseInt(cx)+7000;
+          cy=parseInt(cy)+7000;
+          // if(offset){
+            //   drawLineOffset(cx,cy,px,py,line);
+            //   } else {
+            if(cx<0 || cy<0){
+              console.log('error negative');
+            }
+            drawLine(cx,cy,px,py,line);
+            // }
+          px = cx;
+          py = cy;
+          line = line + 1;
+          $("#depth").text("Depth: "+cz);
+        }
+        function drawLine(cx,cy,px,py,line){
+          ctx.beginPath();
+          ctx.moveTo( px/srate, py/srate);
+          ctx.lineTo( cx/srate, cy/srate);
+          ctx.closePath();
+          ctx.stroke();
+          $("#printline").text("Line: "+line);
+        }
+        // function drawLineOffset(cx,cy,px,py,line){
+          //     ctx.beginPath();
+          //     ctx.moveTo( px/10.0, py/10.0);
+          //     ctx.lineTo( cx/10.0, cy/10.0);
+          //     ctx.closePath();
+          //     ctx.stroke();
+          //     $("#printline").text("Line: "+line);
+          // }
+        function runDemo(){
+          $.get("kono.rml",function(data){
+            drawPath(data);
+          });
+        }
+        function drawPath(rml){
+          var coord1 = rml.match(/PD.*?;/g);
+          var coord2 = rml.match(/Z.*?;/g);
+          var speed = $("input[name=speed]:checked").val();
+          scale = $("input[name=scale]:checked").val();
+          var sval;
+          switch(speed){
+            case "slow":
+              sval = 10;
+              break;
+            case "medium":
+              sval = 5;
+              break;
+            case "fast":
+              sval = 1;
+              break;
+            default:
+              sval = 10;
+          }
+          switch(scale){
+            case "small":
+              srate = 20.0;
+              break;
+            case "medium":
+              srate = 10.0;
+              break;
+            case "large":
+              srate = 5.0;
+              break;
+            default:
+              sval = 20.0;
+          }
+          console.log(sval);
+          if(coord1!=null){
+            load_rml_timers = coord1.map(function(v, i) {
+              if (i < curfile) {
+                return null;
+                } else {
+                return setTimeout(function() {
+                  Func(v);
+                // }, 10+i*10);
+                }, sval+i*sval);
+              }
             });
+            } else {
+            if(coord2!=null){
+              load_rml_timers = coord2.map(function(v, i) {
+                if (i < curfile) {
+                  return null;
+                  } else {
+                  return setTimeout(function() {
+                    Func2(v);
+                    // }, 10+i*10);
+                }, sval+i*sval);
+              }
+            });
+          }
+        }
+      }
 
-        </script>
-    </head>
-    <body>
-        <h1>RML Analyzer</h1>
+      function readFile (evt) {
+        var files = evt.target.files;
+        var file = files[0];           
+        var reader = new FileReader();
+        reader.onload = function() {
+          // console.log(this.result);            
+          drawPath(this.result);
+        }
+        reader.readAsText(file)
+        // data = reader.result;
+        // console.log(data); 
+      }
 
-        <div id="read_text">load RML</div>        
-        <input type="file" id="load_file" name="files[]" multiple />
-        <br />
-        <hr />
-        <button id="demo">run demo</button>
-        <button id="pause">pause</button>
-        <button id="resume">resume</button>
-        <hr />
-        <div id="printline"></div>
-        <div id="depth"></div>
-        <div id="list"></div>
+      $('#load_file').change(function(e){
+        readFile(e);
+      });
+    });
+
+  </script>
+</head>
+<body>
+  <h1>RML Analyzer</h1>
+
+  <div id="read_text">load RML</div>        
+  <input type="file" id="load_file" name="files[]" multiple />
+  <br />
+  <hr />
+  <button id="demo">run demo</button>
+  <button id="pause">pause</button>
+  <button id="resume">resume</button>
+  <hr />
+  <div id="printline"></div>
+  <div id="depth"></div>
+  <div id="list"></div>
+  <form action="">
+    <span>Speed</span>
+    <input type="radio" name="speed" value="slow" checked="checked"> Slow
+    <input type="radio" name="speed" value="medium"> Medium
+    <input type="radio" name="speed" value="fast"> Fast 
+  </form>
+  <form action="">
+    <span>Scale</span>
+    <input type="radio" name="scale" value="small" checked="checked">Small 
+    <input type="radio" name="scale" value="medium">Medium 
+    <input type="radio" name="scale" value="large">Large 
+  </form>
 
 
-        <canvas id="canvas" width="1000" height="600"></canvas>
-    </body>
+
+  <canvas id="canvas" width="1000" height="500"></canvas>
+</body>
 </html>
